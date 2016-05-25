@@ -1986,12 +1986,7 @@ implementation
     {$ENDIF}
 
     tmp := VectorMagnitude(v);
-    if tmp = 0 then
-    begin
-      // input vector is zero, so tmp can be any positive value; result still zero
-      tmp := 1;
-    end;
-    
+    // will crash if tmp is 0 - zero vector has no normal
     result.x := -v.y / tmp;
     result.y :=  v.x / tmp;
 

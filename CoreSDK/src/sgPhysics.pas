@@ -1097,6 +1097,8 @@ implementation
     if not Assigned(sp) then exit;
 
     mvmt := sp^.velocity;
+    if VectorIsZero(mvmt) then exit;
+    
     maxIdx := -1;
     outVec := VectorOverLinesFromCircle(SpriteCollisionCircle(s), lines, mvmt, maxIdx);
     if maxIdx < 0 then exit;
