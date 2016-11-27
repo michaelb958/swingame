@@ -31,299 +31,98 @@ from sg.sg_parameter import SGParameter
 
 import py_lib # template definitions
 
+import generated_folders
 _out_path="../../Generated/Python"
-
 
 _procedure_lines = None
 _function_lines = None
 _exports_header = ''
 
-# Used by USER FACING code - things returned/used by to the user
-BLAH_type_switcher = {
-    None : {    
-        #Pascal type: what it maps to
-        'single': 'float %s',
-        'longint': 'int %s',
-        'soundeffect': 'SoundEffect %s',
-        'music': 'Music %s',
-        'string': 'const char *%s',
-        'boolean': 'bool %s',
-        'byte': 'unsigned char %s',
-        'timer': 'Timer %s',
-        'color': 'Color %s',
-        'resourcekind': 'ResourceKind %s',
-        'longword': 'unsigned int %s',
-        'bitmap': 'Bitmap %s',
-        'pointer': 'void *%s',
-        'single[0..2][0..2]': 'float %s[3][3]',
-        '^bitmapdata': 'BitmapData *%s',
-        '^spritedata': 'SpriteData *%s',
-        '^timerdata': 'TimerData *%s',
-        'boolean[0..n - 1][0..n - 1]': 'bool *%s',
-        'bitmap[0..n - 1]': 'Bitmap *%s',
-        'spritekind': 'SpriteKind %s',
-        'longint[0..n - 1]': 'int *%s',
-        'vector': 'Vector %s',
-        'spriteendingaction': 'SpriteEndingAction %s',
-        'point2d': 'Point2D %s',
-        'point2dptr': 'Point2D *%s',
-        'point2d[0..2]': 'Point2D %s[3]',
-        'point2d[0..n - 1]': 'Point2D *%s',
-        '^linesegment': 'LineSegment *%s',
-        'linesegment': 'LineSegment %s',
-        'sprite': 'Sprite %s',
-        'rectangle': 'Rectangle %s',
-        'triangle': 'Triangle %s',
-        'linesarray': 'LinesArray %s',
-        'linesegmentptr': 'LineSegment *%s',
-        'font': 'Font %s',
-        'fontalignment': 'FontAlignment %s',
-        'fontstyle': 'FontStyle %s',
-        'mousebutton': 'MouseButton %s',
-        'uint16': 'unsigned short %s',
-        'singleptr': 'float *%s',
-        'keycode': 'KeyCode %s',
-        'bitmapptr': 'Bitmap *%s',
-        '^bitmap': 'Bitmap *%s',
-        'longintptr': 'int *%s',
-        '^longint': 'int *%s',
-        'collisionside': 'CollisionSide %s',
-        'longint[0..n - 1][0..n - 1]': 'int *%s',
-        'mapdata': 'MapData %s',
-        'mapanimationdata[0..n - 1]': 'MapAnimationData *%s',
-        'maplayerdata[0..n - 1]': 'MapLayerData *%s',
-        'mapcollisiondata': 'MapCollisionData %s',
-        'maptagdetails[0..n - 1][0..23]': 'MapTagDetails *%s[24]',
-        '^maprecord': 'MapRecord *%s',
-        'map': 'Map %s',
-        'maptag': 'MapTag %s',
-        'tile': 'Tile %s',
-        'circle': 'Circle %s',
-        'point2darray': 'Point2D *%s',
-        'matrix2d': 'Matrix2D %s',
-        None: 'void %s'
-    },
-    'const' : {
-        'point2d': 'const Point2D *%s',
-        'linesegment': 'const LineSegment *%s',
-        'rectangle': 'const Rectangle *%s',
-        'matrix2d': 'const Matrix2D %s',
-        'vector': 'const Vector *%s',
-        'linesarray': 'const LinesArray %s',
-        'triangle': 'const Triangle %s',
-        'bitmaparray': 'const Bitmap %s',
-        'longintarray': 'const int *%s',
-        'circle': 'const Circle *%s',
-    },
-    'var' : {
-        'soundeffect': 'SoundEffect *%s',
-        'music': 'Music *%s',
-        'timer': 'Timer *%s',
-        'string': 'char *%s',
-        'triangle': 'Triangle %s',
-        'linesarray': 'LinesArray %s',
-        'font': 'Font *%s',
-        'bitmap': 'Bitmap *%s',
-        'sprite': 'Sprite *%s',
-        'matrix2d': 'Matrix2D %s',
-        'map': 'Map *%s',
-        'point2darray': 'Point2D *%s',
-        'longintarray': 'int *%s',
-    },
-    'out' : {
-        'string': 'char *%s',
-        'byte': 'unsigned char *%s',
-        'color': 'unsigned int *%s',
-        'timer': 'Timer *%s',
-        'point2d': 'Point2D *%s',
-#        'triangle': 'Triangle *%s'
-        'longint': 'int *%s',
-        'linesegment': 'LineSegment *%s',
-    },
-    'return' : {
-        None: 'void %s',
-        'boolean': 'bool %s',
-        'music': 'Music %s',
-        'soundeffect': 'SoundEffect %s',
-        'single': 'float %s',
-        'point2d': 'Point2D %s',
-        'longint': 'int %s',
-        'timer': 'Timer %s',
-        'byte': 'unsigned char %s',
-        'color': 'Color %s',
-        'longword': 'unsigned int %s',
-        'vector': 'Vector %s',
-        'circle': 'Circle %s',
-        'rectangle': 'Rectangle %s',
-        'linesegment': 'LineSegment %s',
-        'bitmap': 'Bitmap %s',
-        'collisionside': 'CollisionSide %s',
-        'font': 'Font %s',
-        'map': 'Map %s',
-        'sprite': 'Sprite %s',
-        'fontstyle': 'FontStyle %s',
-        'maptag': 'MapTag %s',
-        'maptile': 'MapTile %s',
-        'string': 'String %s',
-        'linesarray': 'LineSegment *%s',
-        'matrix2d': 'Matrix2D %s',
-        'point2darray': 'Point2D *%s',
-        'triangle': 'Triangle %s',
-        'spriteendingaction': 'SpriteEndingAction %s',
-        'spritekind': 'SpriteKind %s',
-    },
-}
-
 # POST-PROCESSING - used in wrapped method bodies
 _data_switcher = {
-    #Pascal type: what values of this type switch to %s = data value
-    'Boolean': '%s != 0'
+    # Pascal type -> what values of this type switch to
+    # %s = data value
+    'Boolean': 'bool(%s)'
 }
-
 # literal substitution
-BLAH_val_switcher = {
-    'True': 'true',
-    'False': 'false'
-}
-
-#------------------------------------------------------------------------------
-# c_int, c_float, c_char_p, c_byte, c_uint32, c_uint16, c_void_p, c_bool
-
 _adapter_type_switcher = {
-    # used in the declaration of types (struct/record ->Structure)
     None: {
-        'single': "('%s', c_float)", #'float %s',
-        'longint': "('%s', c_int)", #'int %s',
-        'soundeffect': "('%s', c_void_p)", #'void *%s',
-        'music': "('%s', c_void_p)", #'void *%s',
-        'string': "('%s', c_char_p)", #'const char *%s',
-        'boolean': "('%s', c_bool)", #'int %s',
-        'byte': "('%s', c_byte)", #'unsigned char %s',
-        'color': "('%s', c_uint32)", #'unsigned int %s',
-        'timer': "('%s', c_void_p)", #'void *%s',
-        'resourcekind': "('%s', c_int)", #'int %s',
-        'longword': "('%s', c_uint32)", #'unsigned int %s',
-        'bitmap': "('%s', c_void_p)", #'void *%s',
-        'rectangle': "('%s', Rectangle)", #'Rectangle %s',
-        'linesegment': "('%s', LineSegment)", #'LineSegment %s',
-        'triangle': "('%s', Triangle)", #'Triangle %s',
-        'point2d': "('%s', Point2D)", #'Point2D %s',
-        'sprite': "('%s', c_void_p)", #'void *%s',
-        'linesarray': 'LinesArray %s',
-        'font': "('%s', c_void_p)", #'void *%s',
-        'fontalignment': "('%s', c_int)", #'int %s',
-        'fontstyle': "('%s', c_int)", #'int %s',
-        'mousebutton': "('%s', c_int)", #'int %s',
-        'uint16': "('%s', c_uint16)", #'unsigned short %s',
-        'vector': "('%s', Vector)", #'Vector %s',
-        'spriteendingaction': "('%s', c_int)", #'SpriteEndingAction %s',
-        'keycode': "('%s', c_int)", #'KeyCode %s',
-        'matrix2d': "('%s', Matrix2D)", #'Matrix2D %s',
-        'collisionside': "('%s', c_int)", #'CollisionSide %s',
-        'map': 'MapRecord *%s',
-        'maptag': "('%s', c_int)", #'Event %s',
-        'maptile': "('%s', MapTile)", #'Tile %s',
-        'circle': "('%s', Circle)", #'Circle %s',
-        'point2darray': 'Point2D *%s',
-        'psdl_surface': "('%s', c_void_p)", #'void *%s',
-        'boolean[0..n - 1][0..n - 1]': 'bool *%s',
-        'boolean[0..n - 1]': 'bool *%s',
-        'bitmap[0..n - 1]': 'void *%s',
-        'spritekind': "('%s', c_int)", #'int %s',
-        'longint[0..n - 1]': 'int *%s',
-        'longintarray': 'int *%s',
-        'longint[0..n - 1][0..n - 1]': 'int *%s',
-        'mapdata': "('%s', MapData)", #'MapData %s',
-        'mapanimationdata[0..n - 1]': 'MapAnimationData *%s',
-        'maplayerdata[0..n - 1]': 'MapLayerData *%s',
-        'mapcollisiondata': "('%s', MapCollisionData)", #'CollisionData %s',
-        'maptagdetails[0..n - 1][0..23]': 'MapTagDetails *%s[24]',
-        'point2dptr': 'Point2D *%s',
-        'point2d[0..n - 1]': 'Point2D *%s',
-        'point2d[0..2]': 'Point2D %s[3]',
-        'linesegmentptr': 'LineSegment *%s',
-        'single[0..2][0..2]': 'float %s[3][3]',
-        'singleptr': 'float *%s',
-        'longintptr': 'int *%s',
-        'bitmapptr': 'void *%s',
-        None: 'void %s'
-    },
-    'const' : {
-        'point2d': 'const Point2D *%s',
-        'linesegment': 'const LineSegment *%s',
-        'rectangle': 'const Rectangle *%s',
-        'matrix2d': 'const Matrix2D %s',
-        'triangle': 'const Triangle %s',
-        'vector': 'const Vector *%s',
-        'linesarray': 'const LinesArray %s',
-        'longintarray': 'const int *%s',
-        'bitmaparray': 'const Bitmap %s',
-        'circle': 'const Circle *%s'
-    },
-    'var': {
-        'soundeffect': 'SoundEffect *%s',
-        'music': 'Music *%s',
-        'timer': 'Timer *%s',
-        'byte': 'unsigned char *%s',
-        'string': 'char *%s',
-        'triangle': 'Triangle %s',
-        'linesarray': 'LinesArray %s',
-        'font': 'Font *%s',
-        'bitmap': 'Bitmap *%s',
-        'sprite': 'Sprite *%s',
-        'map': 'Map *%s'
-    },
-    'out': {
-        'string': 'char *%s',
-        'byte': 'unsigned char *%s',
-        'color': 'unsigned int *%s',
-        'timer': 'void *%s',
-        'point2d': 'Point2D *%s',
-#        'triangle': 'Triangle *%s',
-        'linesarray': 'LinesArray %s',
-        'longint': 'int *%s',
-        'linesegment': 'LineSegment *%s',
-    },
-    'result' : {
-        'string': 'char *%s',
-        'linesarray': 'LineSegment *%s',
-        'matrix2d': 'Matrix2D %s',
-        'point2darray': 'Point2D *%s',
-        'triangle': 'Triangle %s',
-        'longintarray': 'int *%s',
-    },
-    # Mapping of the return type of a function
-    'return' : {
-        None: 'void %s',
-        'boolean': 'int %s',
-        'music': 'Music %s',
-        'soundeffect': 'SoundEffect %s',
-        'single': 'float %s',
-        'point2d': 'Point2D %s',
-        'longint': 'int %s',
-        'timer': 'Timer %s',
-        'byte': 'unsigned char %s',
-        'color': 'unsigned int %s',
-        'longword': 'unsigned int %s',
-        'vector': 'Vector %s',
-        'circle': 'Circle %s',
-        'rectangle': 'Rectangle %s',
-        'linesegment': 'LineSegment %s',
-        'bitmap': 'Bitmap %s',
-        'collisionside': 'CollisionSide %s',
-        'font': 'Font %s',
-        'map': 'Map %s',
-        'sprite': 'Sprite %s',
-        'fontstyle': 'FontStyle %s',
-        'event': 'Event %s',
-        'tile': 'Tile %s',
-        'spriteendingaction': 'SpriteEndingAction %s',
-        'spritekind': 'SpriteKind %s',
+        'void': None,
+        'animation': 'Animation',
+        'animationscript': 'AnimationScript',
+        'arduinodevice': 'c_void_p',
+        'bitmap': 'c_void_p',
+        'bitmap[0..n - 1]': 'c_void_p',
+        'bitmapptr': 'c_void_p',
+        'boolean': 'c_bool',
+        'boolean[0..n - 1]': 'POINTER(c_bool)',
+        'boolean[0..n - 1][0..n - 1]': 'POINTER(c_bool)',
+        'byte': 'c_byte',
+        'circle': 'Circle',
+        'collisionside': 'c_int',
+        'color': 'c_uint32',
+        'connection': 'c_void_p',
+        'drawingdest': 'c_int',
+        'font': 'c_void_p',
+        'fontalignment': 'c_int',
+        'fontstyle': 'c_int',
+        'freenotifier': 'CFUNCTYPE(None, c_void_p)',
+        'guieventcallback': 'CFUNCTYPE(None, Region, EventKind)',
+        'httpresponse': 'c_void_p',
+        'keycode': 'c_int',
+        'linesarray': 'LinesArray',
+        'linesegment': 'LineSegment',
+        'linesegmentptr': 'POINTER(LineSegment)',
+        'longint': 'c_int',
+        'longint[0..n - 1]': 'POINTER(c_int)',
+        'longint[0..n - 1][0..n - 1]': 'POINTER(c_int)',
+        'longintarray': 'POINTER(c_int)',
+        'longintptr': 'POINTER(c_int)',
+        'longword': 'c_uint32',
+        'map': 'MapRecord',
+        'mapanimationdata[0..n - 1]': 'POINTER(MapAnimationData)',
+        'mapcollisiondata': 'MapCollisionData',
+        'mapdata': 'MapData',
+        'maplayerdata[0..n - 1]': 'POINTER(MapLayerData)',
+        'maptag': 'c_int',
+        'maptagdetails[0..n - 1][0..23]': 'POINTER(MapTagDetails)',
+        'maptile': 'MapTile',
+        'matrix2d': 'Matrix2D',
+        'message': 'c_void_p',
+        'mousebutton': 'c_int',
+        'music': 'c_void_p',
+        'panel': 'c_void_p',
+        'point2d': 'Point2D',
+        'point2d[0..2]': 'POINTER(Point2D)',
+        'point2d[0..3]': 'POINTER(Point2D)',
+        'point2d[0..n - 1]': 'POINTER(Point2D)',
+        'point2darray': 'POINTER(Point2D)',
+        'point2dptr': 'POINTER(Point2D)',
+        'pointer': 'c_void_p',
+        'psdl_surface': 'c_void_p',
+        'rectangle': 'Rectangle',
+        'region': 'c_void_p',
+        'resourcekind': 'c_int',
+        'serversocket': 'c_void_p',
+        'single': 'c_float',
+        'single[0..2][0..2]': 'POINTER(c_float)',
+        'singleptr': 'POINTER(c_float)',
+        'soundeffect': 'c_void_p',
+        'sprite': 'c_void_p',
+        'spriteendingaction': 'c_int',
+        'spriteeventhandler': 'CFUNCTYPE(None, Sprite, SpriteEventKind)',
+        'spritefunction': 'CFUNCTYPE(None, Sprite)',
+        'spritekind': 'c_int',
+        'spritesinglefunction': 'CFUNCTYPE(None, Sprite, c_float)',
+        'string': 'c_char_p',
+        'timer': 'c_void_p',
+        'triangle': 'Triangle',
+        'uint16': 'c_uint16',
+        'vector': 'Vector',
+        'window': 'Window',
+        'word': 'c_uint16'
     }
-
 }
-
-_names = []
 
 
 def arg_visitor(arg_str, the_arg, for_param_or_type):
@@ -359,44 +158,111 @@ def adapter_param_visitor(the_param, last):
         ', ' if not last else '')
 
 def type_visitor(the_type, modifier = None):
-    '''switch types for the c SwinGame library'''
-    name = None if the_type is None else the_type.name.lower()
-    if name not in _type_switcher[modifier]:
-        logger.error('CREATE  : Error changing model type %s - %s', modifier, the_type)
-        assert False
-    
-    return _type_switcher[modifier][name]
+    return "%s %%s" % ('void' if the_type is None else the_type.name)
 
 def param_visitor(the_param, last):
     return '%s%s' % (
         type_visitor(the_param.data_type, the_param.modifier) % the_param.name,
         ', ' if not last else '')
 
+# accumulates methods and prints them later
+methods_visited = {} # calls.name -> [(method, name, details)]
+IGNORE_METHODS = [
+    'sg_Input_MouseWheelScroll',
+    'sg_Geometry_VectorToString',
+]
+
 def method_visitor(the_method, other):
     details = the_method.to_keyed_dict(
         other['param visitor'], 
         other['type visitor'], 
         other['arg visitor'])
+    if details['calls.name'] in IGNORE_METHODS:
+        logging.warn('Skipping method %s', details['calls.name'])
+        return other
+    
     # check and cleanup doc strings ... % need to be %%, + line indent
     if '%' in details['doc']:
         details['doc'] = details['doc'].replace('%','%%')
-    details['doc'] = '\n   '.join([ line for line in details['doc'].splitlines() ])
-
-    if other['writer'] != None: 
-        if the_method.is_function:
-            #%(calls.name)s(%(calls.args)s)
-#            print details
-            details['the_call'] = other['arg visitor']('%(calls.name)s(%(calls.args)s)' % details, None, the_method.return_type)
-            other['writer'].write(py_lib.function % details % the_method['uname'])
-        else:
-            other['writer'].write(py_lib.method % details)
+    details['doc'] = '\n   '.join(line for line in details['doc'].splitlines())
+    
+    #print json.dumps([details['name'], details['uname'], details['calls.name'], details['args'], details['calls.args']], indent=2)
+    if (','.join(a.lstrip() for a in details['args'].split(',')) !=
+            ','.join(a.lstrip() for a in details['calls.args'].split(','))):
+        # it's an alias, which we need to wrap
+        details['is_alias'] = True
+    
+    # parameter processing
+    params = details['params'].split(', ')
+    args = details['args'].split(',') # don't ask me why it's different
+    if params[0]:
+        # munge into Python-acceptable form
+        shortparams = [p[:p.index(' ')] for p in params]
+        # deal with result parameters added by post_parse_process
+        lastp = params[-1]
+        resultbufs = 1 if lastp[lastp.index(' ')+1:] == 'result' else 0
+        if resultbufs:
+            params = params[:-resultbufs]
+            args = args[:-resultbufs]
+            shortparams = shortparams[:-resultbufs]
+        # fill in argument types for checking
+        argtypes = [_adapter_type_switcher[None].get(p.lower(), p) for p in shortparams]
+    else:
+        shortparams = []
+        argtypes = ''
+        resultbufs = 0
+    details['params'] = ', '.join(params)
+    details['args'] = ', '.join(args).replace('bool(', '').replace(')', '')
+    details['shortparams'] = ', '.join(shortparams)
+    details['argtypes'] = ', '.join(argtypes)
+    details['resultbufs'] = resultbufs
+    details['pre_call'] = ''
+    details['post_call'] = ''
+    details['calls.args'] = details['calls.args'].replace('true', 'True').replace('false', 'False')
+    
+    # return type munging
+    ret_type = details['return_type']
+    ret_type = ret_type[:ret_type.index(' ')]
+    ret_type = _adapter_type_switcher[None].get(ret_type.lower(), ret_type)
+    details['return_type'] = ret_type
+    
+    methods_visited.setdefault(details['calls.name'], []).append(details)
     
     return other
 
+def visited_methods_writer(details_list, writer):
+    true_method_details = [d for d in details_list if not 'is_alias' in d]
+    assert len(true_method_details) == 1
+    true_method_details = true_method_details[0]
+    
+    def write_method(template, details):
+        writer.write(template % details)
+    
+    true_method_uname = true_method_details['uname_lower']
+    if true_method_uname in py_lib.special_cases:
+        template = py_lib.special_cases[true_method_uname]
+    elif true_method_details['return_type'] is None:
+        #details['the_call'] = other['arg visitor']('%(calls.name)s(%(calls.args)s)' % details, None, the_method.return_type)
+        template = py_lib.function
+    else:
+        template = py_lib.method
+    write_method(template, true_method_details)
+    
+    for details in details_list:
+        if details is true_method_details:
+            continue
+        details['is_alias'] = true_method_uname
+        write_method(py_lib.alias, details)
 
 def write_methods_for(member, other):
     '''Write out member methods'''
+    global methods_visited
+    methods_visited = {}
     member.visit_methods(method_visitor, other)
+    if other['writer'] is not None:
+        for k in sorted(methods_visited.keys()):
+            details_list = methods_visited[k]
+            visited_methods_writer(details_list, other['writer'])
 
 def write_type_for(member, other):
     '''Write out a type (class, struct, enum, typedef)'''
@@ -408,18 +274,19 @@ def write_type_for(member, other):
         if member.is_pointer_wrapper:
             # assert len(member.fields) == 1
             the_type = member.data_type
-            writer.writeln('typedef %s;\n' % adapter_type_visitor(the_type, None) % member.name)
         elif member.is_data_wrapper:
             assert len(member.fields) == 1
             the_type = member.fields['data'].data_type
-            writer.writeln('typedef %s;\n' % adapter_type_visitor(the_type) % member.name)
         elif member.wraps_array:
             assert len(member.fields) == 1
             the_type = member.fields['data'].data_type
-            writer.writeln('typedef %s;\n' % adapter_type_visitor(the_type) % member.name)
+        elif member.data_type.is_procedure:
+            assert member.data_type.method != None
+            the_type = member.data_type
         else:
             logger.error('CREATE PYTHON  : Unknown class type for %s', member.uname)
             assert False
+        writer.writeln('%s = c_void_p\n' % member.name)
     # PURE STRUCT
     elif member.is_struct:
         #class Point2D(Structure): # record/struct;
@@ -428,7 +295,7 @@ def write_type_for(member, other):
         writer.writeln("    '''%s\n    '''" % '\n   '.join(member.doc.splitlines()))
         writer.writeln('    _fields_ = [')
         for field in member.field_list:
-            writer.writeln('        %s,' % adapter_type_visitor(field.data_type) % field.name)
+            writer.writeln('        (%r, %s),' % (field.name, adapter_type_visitor(field.data_type)))
         writer.writeln('    ]\n')
     # PURE ENUM
     elif member.is_enum:
@@ -436,19 +303,20 @@ def write_type_for(member, other):
         # basic -> (...) = map(c_int, range(length(...))
         # class object FontAlignment.Left etc
         #other['writer'].write(str(member) + str(dir(member)))
-        writer.writeln('class %s(object): # enum' % member.name)
+        writer.writeln('class %s(c_int_enum):' % member.name)
         writer.writeln("    '''%s\n    '''" % '\n   '.join(member.doc.splitlines()))
         for i, v in enumerate(member.values):
+            v = v.replace('None', '_None')
             if '=' in v:
-                v = v.replace(' = ', ' = c_int(') + ')' # use provided indicies
+                pass # nothing to do here; indices already provided
             else:
-                v = v + ' = c_int(%d)' % i # need to add indicies
+                v = v + ' = %d' % i # need to add indices
             writer.writeln('    %s' % v)
         writer.writeln('')
         
 
 def write_py_module(the_file):
-    '''Write the header and c file to wrap the attached files detials'''
+    '''Write the header and c file to wrap the attached files details'''
     mod = FileWriter('%s/%s.py' % (_out_path, the_file.name))
     
     mod.writeln(py_lib.header % { 
@@ -458,8 +326,14 @@ def write_py_module(the_file):
     
     for a_file in the_file.uses:
         if a_file.name != None:
-            mod.writeln("import %s\n" % a_file.name)
+            mod.writeln("from %s import *\n" % a_file.name)
     mod.writeln('')
+    
+    if the_file.name != 'SGSDK':
+        mod.writeln(py_lib.header2)
+    
+    if the_file.name == 'Types':
+        mod.writeln(py_lib.enum_class)
     
     #process all methods
     other = {
@@ -499,6 +373,7 @@ def post_parse_process(the_file):
                 #add length parameters to this method
                 for param in method.method_called.params:
                     if param.is_length_param:
+                        raise RuntimeError("Uh oh! This case isn't properly developed yet")
                         param_list = list(method.params)
                         param_list.append(param)
                         method.params = tuple(param_list)
@@ -508,17 +383,17 @@ def post_parse_process(the_file):
 
 def file_visitor(the_file, other):
     '''Called for each file read in by the parser'''
-    if the_file.name == 'SGSDK':
-        return
+    # if the_file.name == 'SGSDK':
+        # return
     post_parse_process(the_file)
     print the_file.name
     logger.info('Creating Python SwinGame Module %s', the_file.name)
     write_py_module(the_file)
 
 def main():
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.WARN,
                         format='%(asctime)s - %(levelname)s - %(message)s',
-                        stream=sys.stdout)
+                        stream=sys.stderr)
     
     #load_data()
     parser_runner.run_for_all_units(file_visitor)

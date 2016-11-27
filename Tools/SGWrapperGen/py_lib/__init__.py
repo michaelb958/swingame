@@ -8,9 +8,6 @@ Links to platform SGSDK library (SGSDK.dll, libSGSDK.so, or libSGSDK.dylib)
 
 """
 '''
-
-# './c_lib/lib_import_header.txt')
-_lib_import_header= '''#include "%(name)s.h"'''
     
 #TODO: Add module level description to module header __doc__ block
 header = '''"""MODULE DESCRIPTION HERE!
@@ -22,35 +19,111 @@ header = '''"""MODULE DESCRIPTION HERE!
 
 '''
 
+header2 = """
+from ctypes import cdll, Structure, c_void_p, c_bool, POINTER, c_byte, c_int, c_uint32, c_float, c_char_p, c_uint16, CFUNCTYPE, create_string_buffer, byref
+
+SGSDK = cdll.SGSDK
+
+_BUFLEN = 256
+
+def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
+    if doc is not None:
+        f.__doc__ = doc
+    f.restype = ret_type
+    # can't deal with argtypes outside, because sometimes the same C API func
+    # has two wrappers...
+    from functools import wraps
+    @wraps(f)
+    def wrapper(*args):
+        f.argtypes = argtypes + [c_char_p] * result_buffers
+        if result_buffers == 0:
+            return f(*args)
+        # returning string[s]
+        assert ret_type is None
+        bufs = [create_string_buffer(_BUFLEN) for i in range(result_buffers)]
+        f(*(args + bufs))
+        return tuple(b.value for b in bufs)
+    wrapper.__extern__ = f
+    return wrapper
+"""
+
+enum_class = """
+class c_int_enum_META(type):
+    def __new__(cls, name, bases, ns):
+        for k in ns:
+            v = ns[k]
+            if isinstance(v, int):
+                ns[k] = c_int(v)
+        return type.__new__(cls, name, bases, ns)
+
+# Py2-Py3 compat hackery
+def from_metaclass(metacls):
+    return metacls('from_metaclass(%s)' % metacls.__name__, (object,), {})
+
+class c_int_enum(from_metaclass(c_int_enum_META)):
+    def __new__(cls, *args):
+        raise RuntimeError("can't instantiate an enum")
+    
+    # needed for ctypes to play nice
+    @classmethod
+    def from_param(self):
+        pass
+
+"""
+
 # import sgsdk # dll bindings (methods/functions)
 # import types # known types (structs, enums)
 
 method = """
-def %(uname)s(%(params)s):
-    '''%(doc)s
+%(uname_lower)s = extern(
+    SGSDK.%(calls.name)s,
+    [%(argtypes)s],
+    doc='''%(doc)s
     params: %(params)s
-    '''
-    %(calls.name)s(%(calls.args)s)
-
+    ''',
+    ret_type=%(return_type)s,
+    result_buffers=%(resultbufs)d)
 """
-#void %(uname)s(%(params)s)
-#{
-#    %(calls.name)s(%(calls.args)s);
-#}
-
 
 function = """
-def %(uname)s(%(params)s):
-    '''%(doc)s
+%(uname_lower)s = extern(
+    SGSDK.%(calls.name)s,
+    [%(argtypes)s],
+    doc='''%(doc)s
     params: %(params)s
     returns: %(return_type)s
-    '''
-    return %(the_call)s
-
+    ''',
+    ret_type=%(return_type)s,
+    result_buffers=%(resultbufs)d)
 """
-#%(return_type)s(%(params)s)
-#{
-#    return %(the_call)s;
-#}
 
+alias = """
+def %(uname_lower)s(%(args)s):
+    '''%(doc)s
+    params: %(params)s
+    '''
+    return %(is_alias)s(%(calls.args)s)
+"""
 
+# special cases
+special_cases = {
+'calculate_framerate': """
+def %(uname_lower)s():
+    '''%(doc)s
+    params: %(params)s
+    '''
+    bufs = [create_string_buffer(10) for i in range(3)]
+    color = c_int()
+    SGSDK.%(calls.name)s(bufs[0], bufs[1], bufs[2], byref(color))
+    return tuple([b.value for b in bufs] + [color])
+""",
+'widest_points': """
+def %(uname_lower)s(c, along):
+    '''%(doc)s
+    params: %(params)s
+    '''
+    pt1, pt2 = Point2D(), Point2D()
+    SGSDK.%(calls.name)s(c, along, byref(pt1), byref(pt2))
+    return pt1, pt2
+""",
+}
