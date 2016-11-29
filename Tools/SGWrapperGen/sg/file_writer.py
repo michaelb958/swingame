@@ -74,6 +74,12 @@ class FileWriter(object):
 
         self.out_file.close()
     
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *exc):
+        self.close()
+
 
 def main():
     pass
