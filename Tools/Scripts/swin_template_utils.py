@@ -72,7 +72,7 @@ def run_python(script_name, base_path=python_script_dir):
 
 def run_bash(script_name, opts):
     if get_os_name() == "Windows":
-        exec_list = ["bash", script_name]
+        exec_list = ["bash", "-c", script_name]
     else:
         exec_list = [script_name]
 
@@ -272,199 +272,213 @@ def pkg_rename_cpp(dist_dict, tmp_dir, to_dir):
 
 template_details = {
     'Pascal':   {
-              'script':       'create_pascal_library.py',
+        'script':       'create_pascal_library.py',
 
-              'use_sgsdk':    False,
-              'libsgsdk':     False,
+        'use_sgsdk':    False,
+        'libsgsdk':     False,
 
-              'copy_dist':    [
-                  {
-                    'target':         'fpc',
-                    'source':         'FPC',
-                    'os':             ['Mac OS X', 'Windows', 'Linux'],
-                    'lib':            None,
-                    'libs':           [
-                                        ('staticlib/mac','lib/mac'),
-                                        ('lib/win32','lib/win32'),
-                                        ('lib/win64','lib/win64'),
-                                      ],
-                    'post_copy':        make_sh_exec
-                  },
-                  {
-                    'target':     'iOS',
-                    'os':         ['iOS'],
-                    'lib':        'staticlib',
-                  },
-              ],
-              'pre_copy_script': None,
-          },
-      'C':    {
-              'script':       'create_c_library.py',
+        'copy_dist':    [
+            {
+                'target':         'fpc',
+                'source':         'FPC',
+                'os':             ['Mac OS X', 'Windows', 'Linux'],
+                'lib':            None,
+                'libs':           [
+                                    ('staticlib/mac','lib/mac'),
+                                    ('lib/win32','lib/win32'),
+                                    ('lib/win64','lib/win64'),
+                                  ],
+                'post_copy':        make_sh_exec
+            },
+            {
+                'target':     'iOS',
+                'os':         ['iOS'],
+                'lib':        'staticlib',
+            },
+        ],
+        'pre_copy_script': None,
+    },
+    'C':    {
+        'script':       'create_c_library.py',
 
-              'use_sgsdk':    True,
-              'libsgsdk':     False,
+        'use_sgsdk':    True,
+        'libsgsdk':     False,
 
-              'copy_dist':    [
-                  {
-                    'lang':          'CPP',
-                    'target':        'gpp',
-                    'os':            ['Mac OS X', 'Windows', 'Linux'],
-                    'lib':           'lib',
-                    'staticsgsdk':    False,
-                    'post_copy':      [make_sh_exec, rename_c_to_cpp]
-                  },
-                  {
-                    'lang':          'CPP',
-                    'target':        'VisualStudio',
-                    'os':            ['Windows'],
-                    'lib':           'lib',
-                    'staticsgsdk':    False,
-                    'post_copy':      rename_c_to_cpp
-                  },
-                  {
-                    'target':     'gcc',
-                    'os':         ['Mac OS X', 'Windows', 'Linux'],
-                    'lib':        'lib',
-                    'staticsgsdk':    False,
-                    'post_copy':      make_sh_exec
-                  },
-                  # {
-                  #   'target':       'iOS',
-                  #   'os':           ['iOS'],
-                  #   'lib':          'staticlib/ios',
-                  #   'staticsgsdk':  True,
-                  # },
-              ],
-              'pre_copy_script': None,
-          },
-      'ObjC': {
-              'script':       'create_objc_library.py',
+        'copy_dist':    [
+            {
+                'lang':          'CPP',
+                'target':        'gpp',
+                'os':            ['Mac OS X', 'Windows', 'Linux'],
+                'lib':           'lib',
+                'staticsgsdk':    False,
+                'post_copy':      [make_sh_exec, rename_c_to_cpp]
+            },
+            {
+                'lang':          'CPP',
+                'target':        'VisualStudio',
+                'os':            ['Windows'],
+                'lib':           'lib',
+                'staticsgsdk':    False,
+                'post_copy':      rename_c_to_cpp
+            },
+            {
+                'target':     'gcc',
+                'os':         ['Mac OS X', 'Windows', 'Linux'],
+                'lib':        'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            # {
+            #   'target':       'iOS',
+            #   'os':           ['iOS'],
+            #   'lib':          'staticlib/ios',
+            #   'staticsgsdk':  True,
+            # },
+        ],
+        'pre_copy_script': None,
+    },
+    'ObjC': {
+        'script':       'create_objc_library.py',
 
-              'use_sgsdk':    True,
-              'libsgsdk':     False,
+        'use_sgsdk':    True,
+        'libsgsdk':     False,
 
-              'copy_dist':    [
-                  {
-                      'target':       'gcc',
-                      'os':           [ 'Mac OS X' ],
-                      'lib':          'lib',
-                      'staticsgsdk':  False,
-                      'post_copy':    make_sh_exec
-                  },
-              ],
-              'pre_copy_script': None,
-           },
+        'copy_dist':    [
+            {
+                'target':       'gcc',
+                'os':           [ 'Mac OS X' ],
+                'lib':          'lib',
+                'staticsgsdk':  False,
+                'post_copy':    make_sh_exec
+            },
+        ],
+        'pre_copy_script': None,
+    },
     'CSharp':   {
-            'script':       'create_csharp_library.py',
-            'use_sgsdk':    True,
-            'libsgsdk':     True,
-            'copy_dist':    [
-                {
-                  'source':         'Mono',
-                  'target':         'mono',
-                  'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                  'post_copy':      make_sh_exec
-                },
-                {
-                  'source':         'WinCmd',
-                  'target':         'WinCmd',
-                  'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                  'post_copy':      make_sh_exec
-                },
-                {
-                  'source':         'MonoDevelop',
-                  'target':         'MonoDevelop',
-                  'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                  'post_copy':      make_sh_exec
-                },
-                {
-                  'source':         'VS13',
-                  'target':         'vs13',
-                  'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                },                {
-                  'source':         'XamarianStudio',
-                  'target':         'XamarianStudio',
-                  'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                  'post_copy':      make_sh_exec
-                },
-                {
-                  'target':         'vs08',
-                  'source':         'VS08',
-                  'os':             [ 'Windows' ],
-                  'lib':            'lib/win32',
-                  'staticsgsdk':    False,
-                  'pkg_script':     pkg_vs_installer,
-                  'template_loc':   'Express C# 08',
-                  'pkg_name':       'C# SwinGame %s 2008 Installer.vsi' % (sg_version),
-                  'replace_file':   'GameMain.cs',
-                  'replace_dir':    'src',
-                  'search_for':     'MyGame',
-                  'replace_with':   "$safeprojectname$.src",
-                  'proj_zip_name':  'SwinGame C# Project.zip',
-                },
-                {
-                  'target':         'vs10',
-                  'source':         'VS10',
-                  'os':             [ 'Windows' ],
-                  'lib':            'lib/win32',
-                  'staticsgsdk':    False,
-                  'pkg_script':     pkg_vs_installer,
-                  'template_loc':   'Express C# 10',
-                  'pkg_name':       'C# SwinGame %s 2010 Installer.vsi' % (sg_version),
-                  'replace_file':   'GameMain.cs',
-                  'replace_dir':    'src',
-                  'search_for':     'MyGame',
-                  'replace_with':   "$safeprojectname$.src",
-                  'proj_zip_name':  'SwinGame C# Project.zip',
-                },
-                {
-                  'target':         'vs10proj',
-                  'source':         'VS10Proj',
-                  'os':             [ 'Windows' ],
-                  'lib':            'lib/win32',
-                  'staticsgsdk':    False,
-                  'post_copy':    bndl_vsproj,
-                },
-                {
-                  'lang':           'VB',
-                  'source':         'Mono',
-                  'target':         'mono',
-                  'os':             [ 'Mac OS X', 'Linux', 'Windows' ],
-                  'lib':            'lib',
-                  'staticsgsdk':    False,
-                  'post_copy':      make_sh_exec
-                },
-                {
-                  'lang':           'VB',
-                  'source':         'VS08',
-                  'target':         'vs08',
-                  'os':             [ 'Windows' ],
-                  'lib':            'lib/win32',
-                  'staticsgsdk':    False,
-                  'pkg_script':     pkg_vs_installer,
-                  'template_loc':   'Express VB 08',
-                  'pkg_name':       'VB SwinGame %s 2008 Installer.vsi' % (sg_version),
-                  'replace_file':   'Mono.vbproj',
-                  'replace_dir':    '',
-                  'search_for':     'Mono',
-                  'replace_with':   "$safeprojectname$",
-                  'proj_zip_name':  'SwinGame VB Project.zip',
-                },
-            ],
-            'pre_copy_script': build_csharp_lib,
-        },
-
-} # end _template_details
+        'script':       'create_csharp_library.py',
+        'use_sgsdk':    True,
+        'libsgsdk':     True,
+        'copy_dist':    [
+            {
+                'source':         'Mono',
+                'target':         'mono',
+                'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            {
+                'source':         'WinCmd',
+                'target':         'WinCmd',
+                'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            {
+                'source':         'MonoDevelop',
+                'target':         'MonoDevelop',
+                'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            {
+                'source':         'VS13',
+                'target':         'vs13',
+                'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+            },                {
+                'source':         'XamarianStudio',
+                'target':         'XamarianStudio',
+                'os':             [ 'Mac OS X', 'Windows', 'Linux' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            {
+                'target':         'vs08',
+                'source':         'VS08',
+                'os':             [ 'Windows' ],
+                'lib':            'lib/win32',
+                'staticsgsdk':    False,
+                'pkg_script':     pkg_vs_installer,
+                'template_loc':   'Express C# 08',
+                'pkg_name':       'C# SwinGame %s 2008 Installer.vsi' % (sg_version),
+                'replace_file':   'GameMain.cs',
+                'replace_dir':    'src',
+                'search_for':     'MyGame',
+                'replace_with':   "$safeprojectname$.src",
+                'proj_zip_name':  'SwinGame C# Project.zip',
+            },
+            {
+                'target':         'vs10',
+                'source':         'VS10',
+                'os':             [ 'Windows' ],
+                'lib':            'lib/win32',
+                'staticsgsdk':    False,
+                'pkg_script':     pkg_vs_installer,
+                'template_loc':   'Express C# 10',
+                'pkg_name':       'C# SwinGame %s 2010 Installer.vsi' % (sg_version),
+                'replace_file':   'GameMain.cs',
+                'replace_dir':    'src',
+                'search_for':     'MyGame',
+                'replace_with':   "$safeprojectname$.src",
+                'proj_zip_name':  'SwinGame C# Project.zip',
+            },
+            {
+                'target':         'vs10proj',
+                'source':         'VS10Proj',
+                'os':             [ 'Windows' ],
+                'lib':            'lib/win32',
+                'staticsgsdk':    False,
+                'post_copy':    bndl_vsproj,
+            },
+            {
+                'lang':           'VB',
+                'source':         'Mono',
+                'target':         'mono',
+                'os':             [ 'Mac OS X', 'Linux', 'Windows' ],
+                'lib':            'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+            {
+                'lang':           'VB',
+                'source':         'VS08',
+                'target':         'vs08',
+                'os':             [ 'Windows' ],
+                'lib':            'lib/win32',
+                'staticsgsdk':    False,
+                'pkg_script':     pkg_vs_installer,
+                'template_loc':   'Express VB 08',
+                'pkg_name':       'VB SwinGame %s 2008 Installer.vsi' % (sg_version),
+                'replace_file':   'Mono.vbproj',
+                'replace_dir':    '',
+                'search_for':     'Mono',
+                'replace_with':   "$safeprojectname$",
+                'proj_zip_name':  'SwinGame VB Project.zip',
+            },
+        ],
+        'pre_copy_script': build_csharp_lib,
+    },
+    'Python':   {
+        'script': 'create_py_library.py',
+        'use_sgsdk': True,
+        'libsgsdk': True,
+        'copy_dist': [
+            {
+                'target':     'Python',
+                'os':         ['Windows'],
+                'lib':        'lib',
+                'staticsgsdk':    False,
+                'post_copy':      make_sh_exec
+            },
+        ],
+        'pre_copy_script': None,
+    },
+} # end template_details
 
 def deploy_list():
     """Returns a list of the files that need to be deployed to the server"""

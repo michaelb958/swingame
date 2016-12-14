@@ -10,6 +10,7 @@ _generated_directories = {
 	'Documentation': 	['html', 'sql'],
 	'ObjC': 			['lib'],
 	'Pascal': 			['lib'],
+    'Python':           ['lib'],
 	'Source': 			['src']
 }
 

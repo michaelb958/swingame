@@ -19,8 +19,12 @@ SwinGame/     - the module name
 
 """
 
+from __future__ import print_function
+
 import logging
 import sys
+import os
+import os.path as path
 
 from sg import parser_runner
 from sg.sg_cache import logger, find_or_add_file
@@ -32,7 +36,12 @@ from sg.sg_parameter import SGParameter
 import py_lib # template definitions
 
 import generated_folders
-_out_path="../../Generated/Python"
+
+_out_path = path.join('..', '..', 'Generated', 'Python', 'lib', 'swingame')
+try:
+    os.makedirs(_out_path)
+except OSError:
+    pass
 
 _procedure_lines = None
 _function_lines = None
@@ -186,7 +195,6 @@ def method_visitor(the_method, other):
         details['doc'] = details['doc'].replace('%','%%')
     details['doc'] = '\n   '.join(line for line in details['doc'].splitlines())
     
-    #print json.dumps([details['name'], details['uname'], details['calls.name'], details['args'], details['calls.args']], indent=2)
     if (','.join(a.lstrip() for a in details['args'].split(',')) !=
             ','.join(a.lstrip() for a in details['calls.args'].split(','))):
         # it's an alias, which we need to wrap
@@ -317,39 +325,36 @@ def write_type_for(member, other):
 
 def write_py_module(the_file):
     '''Write the header and c file to wrap the attached files details'''
-    mod = FileWriter('%s/%s.py' % (_out_path, the_file.name))
-    
-    mod.writeln(py_lib.header % { 
-        'name' : the_file.name,
-        'pascal_name' : the_file.pascal_name}
-    )
-    
-    for a_file in the_file.uses:
-        if a_file.name != None:
-            mod.writeln("from %s import *\n" % a_file.name)
-    mod.writeln('')
-    
-    if the_file.name != 'SGSDK':
-        mod.writeln(py_lib.header2)
-    
-    if the_file.name == 'Types':
-        mod.writeln(py_lib.enum_class)
-    
-    #process all methods
-    other = {
-        'writer': mod,
-        'type visitor': type_visitor,
-        'param visitor': param_visitor,
-        'arg visitor': arg_visitor
-    }
+    with FileWriter(path.join(_out_path, the_file.name + '.py')) as mod:
+        mod.writeln(py_lib.header % { 
+            'name' : the_file.name,
+            'pascal_name' : the_file.pascal_name,
+        })
+        
+        for a_file in the_file.uses:
+            if a_file.name != None:
+                mod.writeln("from %s import *\n" % a_file.name)
+        mod.writeln('')
+        
+        if the_file.name != 'SGSDK':
+            mod.writeln(py_lib.header2)
+        
+        if the_file.name == 'Types':
+            mod.writeln("from _common import c_int_enum")
+        
+        #process all methods
+        other = {
+            'writer': mod,
+            'type visitor': type_visitor,
+            'param visitor': param_visitor,
+            'arg visitor': arg_visitor
+        }
 
-    for m in the_file.members:
-        if m.is_class or m.is_struct or m.is_enum or m.is_type:
-            write_type_for(m, other)        
-        elif m.is_module:
-            write_methods_for(m, other)
-
-    mod.close()
+        for m in the_file.members:
+            if m.is_class or m.is_struct or m.is_enum or m.is_type:
+                write_type_for(m, other)        
+            elif m.is_module:
+                write_methods_for(m, other)
 
 def post_parse_process(the_file):
     ''' the c modules also wrap array return values and adds length parameters for arrays.'''
@@ -386,7 +391,7 @@ def file_visitor(the_file, other):
     # if the_file.name == 'SGSDK':
         # return
     post_parse_process(the_file)
-    print the_file.name
+    print(the_file.name)
     logger.info('Creating Python SwinGame Module %s', the_file.name)
     write_py_module(the_file)
 
@@ -397,7 +402,9 @@ def main():
     
     #load_data()
     parser_runner.run_for_all_units(file_visitor)
-
+    
+    with FileWriter(path.join(_out_path, '__init__.py')) as f:
+        f.write('from SGSDK import *\n')
 
 if __name__ == '__main__':
     try:

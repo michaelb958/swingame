@@ -21,58 +21,8 @@ header = '''"""MODULE DESCRIPTION HERE!
 
 header2 = """
 from ctypes import cdll, Structure, c_void_p, c_bool, POINTER, c_byte, c_int, c_uint32, c_float, c_char_p, c_uint16, CFUNCTYPE, create_string_buffer, byref
-
-SGSDK = cdll.SGSDK
-
-_BUFLEN = 256
-
-def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
-    if doc is not None:
-        f.__doc__ = doc
-    f.restype = ret_type
-    # can't deal with argtypes outside, because sometimes the same C API func
-    # has two wrappers...
-    from functools import wraps
-    @wraps(f)
-    def wrapper(*args):
-        f.argtypes = argtypes + [c_char_p] * result_buffers
-        if result_buffers == 0:
-            return f(*args)
-        # returning string[s]
-        assert ret_type is None
-        bufs = [create_string_buffer(_BUFLEN) for i in range(result_buffers)]
-        f(*(args + bufs))
-        return tuple(b.value for b in bufs)
-    wrapper.__extern__ = f
-    return wrapper
+from _common import SGSDK, extern
 """
-
-enum_class = """
-class c_int_enum_META(type):
-    def __new__(cls, name, bases, ns):
-        for k in ns:
-            v = ns[k]
-            if isinstance(v, int):
-                ns[k] = c_int(v)
-        return type.__new__(cls, name, bases, ns)
-
-# Py2-Py3 compat hackery
-def from_metaclass(metacls):
-    return metacls('from_metaclass(%s)' % metacls.__name__, (object,), {})
-
-class c_int_enum(from_metaclass(c_int_enum_META)):
-    def __new__(cls, *args):
-        raise RuntimeError("can't instantiate an enum")
-    
-    # needed for ctypes to play nice
-    @classmethod
-    def from_param(self):
-        pass
-
-"""
-
-# import sgsdk # dll bindings (methods/functions)
-# import types # known types (structs, enums)
 
 method = """
 %(uname_lower)s = extern(
