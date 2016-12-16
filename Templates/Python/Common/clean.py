@@ -21,9 +21,9 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     print(u'''\
-    --------------------------------------------------
-              Cleaning Up %s
-    --------------------------------------------------''' % game_name)
+--------------------------------------------------
+          Cleaning Up %s
+--------------------------------------------------''' % game_name)
 
     def clean_folder(name):
         shutil.rmtree(path.join(app_path, name), ignore_errors=True)
