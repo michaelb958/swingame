@@ -51,86 +51,86 @@ _exports_header = ''
 _data_switcher = {
     # Pascal type -> what values of this type switch to
     # %s = data value
-    'Boolean': 'bool(%s)'
+    'Boolean': 'bool(%s)',
+    'LongBool': '(1 if bool(%s) else 0)',
 }
 # literal substitution
 _adapter_type_switcher = {
-    None: {
-        'void': None,
-        'animation': 'Animation',
-        'animationscript': 'AnimationScript',
-        'arduinodevice': 'c_void_p',
-        'bitmap': 'c_void_p',
-        'bitmap[0..n - 1]': 'c_void_p',
-        'bitmapptr': 'c_void_p',
-        'boolean': 'c_bool',
-        'boolean[0..n - 1]': 'POINTER(c_bool)',
-        'boolean[0..n - 1][0..n - 1]': 'POINTER(c_bool)',
-        'byte': 'c_byte',
-        'circle': 'Circle',
-        'collisionside': 'c_int',
-        'color': 'c_uint32',
-        'connection': 'c_void_p',
-        'drawingdest': 'c_int',
-        'font': 'c_void_p',
-        'fontalignment': 'c_int',
-        'fontstyle': 'c_int',
-        'freenotifier': 'CFUNCTYPE(None, c_void_p)',
-        'guieventcallback': 'CFUNCTYPE(None, Region, EventKind)',
-        'httpresponse': 'c_void_p',
-        'keycode': 'c_int',
-        'linesarray': 'LinesArray',
-        'linesegment': 'LineSegment',
-        'linesegmentptr': 'POINTER(LineSegment)',
-        'longint': 'c_int',
-        'longint[0..n - 1]': 'POINTER(c_int)',
-        'longint[0..n - 1][0..n - 1]': 'POINTER(c_int)',
-        'longintarray': 'POINTER(c_int)',
-        'longintptr': 'POINTER(c_int)',
-        'longword': 'c_uint32',
-        'map': 'MapRecord',
-        'mapanimationdata[0..n - 1]': 'POINTER(MapAnimationData)',
-        'mapcollisiondata': 'MapCollisionData',
-        'mapdata': 'MapData',
-        'maplayerdata[0..n - 1]': 'POINTER(MapLayerData)',
-        'maptag': 'c_int',
-        'maptagdetails[0..n - 1][0..23]': 'POINTER(MapTagDetails)',
-        'maptile': 'MapTile',
-        'matrix2d': 'Matrix2D',
-        'message': 'c_void_p',
-        'mousebutton': 'c_int',
-        'music': 'c_void_p',
-        'panel': 'c_void_p',
-        'point2d': 'Point2D',
-        'point2d[0..2]': 'POINTER(Point2D)',
-        'point2d[0..3]': 'POINTER(Point2D)',
-        'point2d[0..n - 1]': 'POINTER(Point2D)',
-        'point2darray': 'POINTER(Point2D)',
-        'point2dptr': 'POINTER(Point2D)',
-        'pointer': 'c_void_p',
-        'psdl_surface': 'c_void_p',
-        'rectangle': 'Rectangle',
-        'region': 'c_void_p',
-        'resourcekind': 'c_int',
-        'serversocket': 'c_void_p',
-        'single': 'c_float',
-        'single[0..2][0..2]': 'POINTER(c_float)',
-        'singleptr': 'POINTER(c_float)',
-        'soundeffect': 'c_void_p',
-        'sprite': 'c_void_p',
-        'spriteendingaction': 'c_int',
-        'spriteeventhandler': 'CFUNCTYPE(None, Sprite, SpriteEventKind)',
-        'spritefunction': 'CFUNCTYPE(None, Sprite)',
-        'spritekind': 'c_int',
-        'spritesinglefunction': 'CFUNCTYPE(None, Sprite, c_float)',
-        'string': 'c_char_p',
-        'timer': 'c_void_p',
-        'triangle': 'Triangle',
-        'uint16': 'c_uint16',
-        'vector': 'Vector',
-        'window': 'Window',
-        'word': 'c_uint16'
-    }
+    'void': None,
+    'animation': 'Animation',
+    'animationscript': 'AnimationScript',
+    'arduinodevice': 'c_void_p',
+    'bitmap': 'c_void_p',
+    'bitmap[0..n - 1]': 'c_void_p',
+    'bitmapptr': 'c_void_p',
+    'boolean': 'c_bool',
+    'boolean[0..n - 1]': 'POINTER(c_bool)',
+    'boolean[0..n - 1][0..n - 1]': 'POINTER(c_bool)',
+    'byte': 'c_byte',
+    'circle': 'Circle',
+    'collisionside': 'c_int',
+    'color': 'c_uint32',
+    'connection': 'c_void_p',
+    'drawingdest': 'c_int',
+    'font': 'c_void_p',
+    'fontalignment': 'c_int',
+    'fontstyle': 'c_int',
+    'freenotifier': 'CFUNCTYPE(None, c_void_p)',
+    'guieventcallback': 'CFUNCTYPE(None, Region, EventKind)',
+    'httpresponse': 'c_void_p',
+    'keycode': 'c_int',
+    'linesarray': 'LinesArray',
+    'linesegment': 'LineSegment',
+    'linesegmentptr': 'POINTER(LineSegment)',
+    'longbool': 'c_int',
+    'longint': 'c_int',
+    'longint[0..n - 1]': 'POINTER(c_int)',
+    'longint[0..n - 1][0..n - 1]': 'POINTER(c_int)',
+    'longintarray': 'POINTER(c_int)',
+    'longintptr': 'POINTER(c_int)',
+    'longword': 'c_uint32',
+    'map': 'MapRecord',
+    'mapanimationdata[0..n - 1]': 'POINTER(MapAnimationData)',
+    'mapcollisiondata': 'MapCollisionData',
+    'mapdata': 'MapData',
+    'maplayerdata[0..n - 1]': 'POINTER(MapLayerData)',
+    'maptag': 'c_int',
+    'maptagdetails[0..n - 1][0..23]': 'POINTER(MapTagDetails)',
+    'maptile': 'MapTile',
+    'matrix2d': 'Matrix2D',
+    'message': 'c_void_p',
+    'mousebutton': 'c_int',
+    'music': 'c_void_p',
+    'panel': 'c_void_p',
+    'point2d': 'Point2D',
+    'point2d[0..2]': 'POINTER(Point2D)',
+    'point2d[0..3]': 'POINTER(Point2D)',
+    'point2d[0..n - 1]': 'POINTER(Point2D)',
+    'point2darray': 'POINTER(Point2D)',
+    'point2dptr': 'POINTER(Point2D)',
+    'pointer': 'c_void_p',
+    'psdl_surface': 'c_void_p',
+    'rectangle': 'Rectangle',
+    'region': 'c_void_p',
+    'resourcekind': 'c_int',
+    'serversocket': 'c_void_p',
+    'single': 'c_float',
+    'single[0..2][0..2]': 'POINTER(c_float)',
+    'singleptr': 'POINTER(c_float)',
+    'soundeffect': 'c_void_p',
+    'sprite': 'c_void_p',
+    'spriteendingaction': 'c_int',
+    'spriteeventhandler': 'CFUNCTYPE(None, Sprite, SpriteEventKind)',
+    'spritefunction': 'CFUNCTYPE(None, Sprite)',
+    'spritekind': 'c_int',
+    'spritesinglefunction': 'CFUNCTYPE(None, Sprite, c_float)',
+    'string': 'c_char_p',
+    'timer': 'c_void_p',
+    'triangle': 'Triangle',
+    'uint16': 'c_uint16',
+    'vector': 'Vector',
+    'window': 'Window',
+    'word': 'c_uint16'
 }
 
 
@@ -147,23 +147,23 @@ def arg_visitor(arg_str, the_arg, for_param_or_type):
     else:
         return arg_str
 
-def adapter_type_visitor(the_type, modifier = None):
+def adapter_type_visitor(the_type):
     '''switch types for the python SwinGame adapter (links to DLL)'''
     name = None if the_type is None else the_type.name.lower()
-    if name not in _adapter_type_switcher[modifier]:
+    if name not in _adapter_type_switcher:
         logger.error('CREATE   : Error changing adapter type %s - %s', modifier, the_type)
     
-    return _adapter_type_switcher[modifier][name]
+    return _adapter_type_switcher[name]
 
 def adapter_param_visitor(the_param, last):
     name = the_param.name.lower()
-    if name not in _adapter_type_switcher[the_param.modifier]:
+    if name not in _adapter_type_switcher:
         logger.error('CREATE   : Error visiting adapter parameter %s - %s', the_param.modifier, the_param.data_type.name)
         return 'XXX'
         #assert False
     
     return '%s%s' % (
-        _adapter_type_switcher[the_param.modifier][name] % the_param.name,
+        _adapter_type_switcher[name] % the_param.name,
         ', ' if not last else '')
 
 def type_visitor(the_type, modifier = None):
@@ -214,7 +214,7 @@ def method_visitor(the_method, other):
             args = args[:-resultbufs]
             shortparams = shortparams[:-resultbufs]
         # fill in argument types for checking
-        argtypes = [_adapter_type_switcher[None].get(p.lower(), p) for p in shortparams]
+        argtypes = [_adapter_type_switcher.get(p.lower(), p) for p in shortparams]
     else:
         shortparams = []
         argtypes = ''
@@ -231,7 +231,7 @@ def method_visitor(the_method, other):
     # return type munging
     ret_type = details['return_type']
     ret_type = ret_type[:ret_type.index(' ')]
-    ret_type = _adapter_type_switcher[None].get(ret_type.lower(), ret_type)
+    ret_type = _adapter_type_switcher.get(ret_type.lower(), ret_type)
     details['return_type'] = ret_type
     
     methods_visited.setdefault(details['calls.name'], []).append(details)
@@ -325,7 +325,7 @@ def write_type_for(member, other):
 
 def write_py_module(the_file):
     '''Write the header and c file to wrap the attached files details'''
-    with FileWriter(path.join(_out_path, the_file.name + '.py')) as mod:
+    with FileWriter(path.join(_out_path, the_file.name.lower() + '.py')) as mod:
         mod.writeln(py_lib.header % { 
             'name' : the_file.name,
             'pascal_name' : the_file.pascal_name,
@@ -333,7 +333,7 @@ def write_py_module(the_file):
         
         for a_file in the_file.uses:
             if a_file.name != None:
-                mod.writeln("from %s import *\n" % a_file.name)
+                mod.writeln("from %s import *\n" % a_file.name.lower())
         mod.writeln('')
         
         if the_file.name != 'SGSDK':
@@ -404,7 +404,7 @@ def main():
     parser_runner.run_for_all_units(file_visitor)
     
     with FileWriter(path.join(_out_path, '__init__.py')) as f:
-        f.write('from SGSDK import *\n')
+        f.write(py_lib.init_py)
 
 if __name__ == '__main__':
     try:

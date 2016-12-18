@@ -30,19 +30,21 @@ def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
     from functools import wraps
     @wraps(f)
     def wrapper(*args):
-        bufs = [create_string_buffer(_BUFLEN) for _ in range(result_buffers)]
+        bufs = tuple(create_string_buffer(_BUFLEN) for _ in range(result_buffers))
         f(*(args + bufs))
         return tuple(b.value for b in bufs)
     wrapper.__func__ = f
     return wrapper
 
 class c_int_enum_META(type):
+    @staticmethod
+    def transform(n):
+        return c_int(n) if isinstance(n, int) else n
+    
     def __new__(cls, name, bases, ns):
-        for k in ns:
-            v = ns[k]
-            if isinstance(v, int):
-                ns[k] = c_int(v)
-        return type.__new__(cls, name, bases, ns)
+        return type.__new__(cls, name, bases, {k: cls.transform(v) for k, v in ns.items()})
+    def __setattr__(self, key, value):
+        type.__setattr__(self, key, type(self).transform(value))
 
 # Py2-Py3 compat hackery
 def from_metaclass(metacls):
