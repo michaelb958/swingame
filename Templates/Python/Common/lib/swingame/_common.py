@@ -1,5 +1,6 @@
 ﻿from __future__ import print_function
-from ctypes import cdll, CDLL, c_int, c_char_p, create_string_buffer
+from ctypes import cdll, c_int, c_char_p, create_string_buffer
+from functools import wraps
 
 _BUFLEN = 256
 
@@ -23,17 +24,18 @@ def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
         f.__doc__ = doc
     f.restype = ret_type
     f.argtypes = argtypes + [c_char_p] * result_buffers
-    if result_buffers == 0:
-        return f
-    # returning string[s]
-    assert ret_type is None
-    from functools import wraps
+    str_indices = [idx for idx, i in enumerate(argtypes) if i is c_char_p]
     @wraps(f)
     def wrapper(*args):
-        bufs = tuple(create_string_buffer(_BUFLEN) for _ in range(result_buffers))
-        f(*(args + bufs))
-        return tuple(b.value for b in bufs)
-    wrapper.__func__ = f
+        args = tuple(a.encode() if i in str_indices else a for i, a in enumerate(args))
+        if result_buffers:
+            bufs = tuple(create_string_buffer(_BUFLEN) for _ in range(result_buffers))
+            f(*(args + bufs))
+            results = tuple(b.value.decode() for b in bufs)
+            return results[0] if len(results) == 1 else results
+        else:
+            return f(*args)
+    wrapper.argtypes = f.argtypes
     return wrapper
 
 class c_int_enum_META(type):

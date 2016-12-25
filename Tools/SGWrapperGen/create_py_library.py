@@ -314,7 +314,7 @@ def write_type_for(member, other):
         writer.writeln('class %s(c_int_enum):' % member.name)
         writer.writeln("    '''%s\n    '''" % '\n   '.join(member.doc.splitlines()))
         for i, v in enumerate(member.values):
-            v = v.replace('None', '_None')
+            v = v.replace('None', 'None_')
             if '=' in v:
                 pass # nothing to do here; indices already provided
             else:
@@ -333,14 +333,14 @@ def write_py_module(the_file):
         
         for a_file in the_file.uses:
             if a_file.name != None:
-                mod.writeln("from %s import *\n" % a_file.name.lower())
+                mod.writeln("from .%s import *\n" % a_file.name.lower())
         mod.writeln('')
         
         if the_file.name != 'SGSDK':
             mod.writeln(py_lib.header2)
         
         if the_file.name == 'Types':
-            mod.writeln("from _common import c_int_enum")
+            mod.writeln("from ._common import c_int_enum")
         
         #process all methods
         other = {
@@ -402,9 +402,6 @@ def main():
     
     #load_data()
     parser_runner.run_for_all_units(file_visitor)
-    
-    with FileWriter(path.join(_out_path, '__init__.py')) as f:
-        f.write(py_lib.init_py)
 
 if __name__ == '__main__':
     try:

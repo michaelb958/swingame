@@ -19,7 +19,7 @@ Wrapping %(pascal_name)s.pas
 
 header2 = """
 from ctypes import cdll, Structure, c_void_p, c_bool, POINTER, c_byte, c_int, c_uint32, c_float, c_char_p, c_uint16, CFUNCTYPE, create_string_buffer, byref
-from _common import SGSDK, extern
+from ._common import SGSDK, extern
 """
 
 method = """
@@ -53,7 +53,6 @@ def %(uname_lower)s(%(args)s):
     return %(is_alias)s(%(calls.args)s)
 """
 
-# special cases
 special_cases = {
 'calculate_framerate': """
 def %(uname_lower)s():
@@ -74,32 +73,40 @@ def %(uname_lower)s(c, along):
     SGSDK.%(calls.name)s(c, along, byref(pt1), byref(pt2))
     return pt1, pt2
 """,
-}
-
-init_py = '''\
-import _common
-import graphics
-from sgsdk import *
-
-def _guess_app_path():
-    from sys import argv
-    import os
-    tried = []
-    for p_base in (os.path.dirname(argv[0]), os.getcwd()):
-        for i in range(3):
-            p = os.path.join(p_base, *(i * ['..'] + ['Resources']))
-            tried.append(p)
-            if os.path.isdir(p):
-                set_app_path(p)
-                return
+'distant_point_on_circle_heading': """
+SGSDK.%(calls.name)s.restype = c_bool
+def %(uname_lower)s(pt, circle, heading):
+    '''%(doc)s
+    params: %(params)s
+    '''
+    result = Point2D()
+    if SGSDK.%(calls.name)s(pt, circle, heading, byref(result)):
+        return result
     else:
-        raise RuntimeError('Resources directory not found: tried ' + '; '.join(tried))
-_guess_app_path()
-
-Color = type('Color', (_common.c_int_enum,),
-    {k[6:]: v() for k, v in graphics.__dict__.items()
-                if k.startswith('color_')
-                and len(getattr(v, 'argtypes', [1])) == 0})
-
-__all__ = [g for g in list(globals()) if g != 'graphics' and g not in dir(_common)]
-'''
+        return None
+""",
+'line_intersection_point': """
+SGSDK.%(calls.name)s.restype = c_bool
+def %(uname_lower)s(l1, l2):
+    '''%(doc)s
+    params: %(params)s
+    '''
+    result = Point2D()
+    if SGSDK.%(calls.name)s(l1, l2, byref(result)):
+        return result
+    else:
+        return None
+""",
+'ray_intersection_point': """
+SGSDK.%(calls.name)s.restype = c_bool
+def %(uname_lower)s(l1, l2):
+    '''%(doc)s
+    params: %(params)s
+    '''
+    result = Point2D()
+    if SGSDK.%(calls.name)s(l1, l2, byref(result)):
+        return result
+    else:
+        return None
+""",
+}

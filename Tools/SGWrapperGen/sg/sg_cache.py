@@ -4,8 +4,8 @@ _files = {}
 _classes = {}
 _loaded_types = {}
 _known_values = [
-        'ColorBlack'
-    ]
+    'ColorBlack',
+]
 
 logger = logging.getLogger("SGWrapperGen")
 
