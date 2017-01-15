@@ -65,13 +65,16 @@ def %(uname_lower)s():
     return tuple([b.value for b in bufs] + [color])
 """,
 'widest_points': """
-def %(uname_lower)s(c, along):
+SGSDK.%(calls.name)s.restype = c_bool
+def %(uname_lower)s(c, from):
     '''%(doc)s
     params: %(params)s
     '''
     pt1, pt2 = Point2D(), Point2D()
-    SGSDK.%(calls.name)s(c, along, byref(pt1), byref(pt2))
-    return pt1, pt2
+    if SGSDK.%(calls.name)s(c, from, byref(pt1), byref(pt2)):
+        return pt1, pt2
+    else:
+        return None, None
 """,
 'distant_point_on_circle_heading': """
 SGSDK.%(calls.name)s.restype = c_bool
@@ -99,14 +102,17 @@ def %(uname_lower)s(l1, l2):
 """,
 'ray_intersection_point': """
 SGSDK.%(calls.name)s.restype = c_bool
-def %(uname_lower)s(l1, l2):
+def %(uname_lower)s(pt, heading, line):
     '''%(doc)s
     params: %(params)s
     '''
     result = Point2D()
-    if SGSDK.%(calls.name)s(l1, l2, byref(result)):
+    if SGSDK.%(calls.name)s(pt, heading, line, byref(result)):
         return result
     else:
         return None
 """,
+'exception_message': '',
+'exception_occured': '',
 }
+special_cases['tangent_points'] = special_cases['widest_points']

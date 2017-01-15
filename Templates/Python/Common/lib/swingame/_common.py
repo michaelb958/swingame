@@ -1,10 +1,11 @@
-﻿from __future__ import print_function
-from ctypes import cdll, c_int, c_char_p, create_string_buffer
+from __future__ import print_function
+from ctypes import cdll, c_int, c_bool, c_char_p, create_string_buffer
+from ctypes.util import find_library
 from functools import wraps
 
-_BUFLEN = 256
+_BUFLEN = 512
 
-# need this to find SGSDK.dll in the app's directory
+# need this to find SGSDK.dll in the app's directory on Windows
 from sys import argv
 from os.path import abspath, dirname
 try:
@@ -17,13 +18,35 @@ except AttributeError:
     # not on Windows
     pass
 
-SGSDK = cdll.SGSDK
+SGSDK = find_library('SGSDK')
+if SGSDK is None:
+    raise ImportError("can't find SGSDK library")
+
+class SwinGameError(Exception):
+    pass
+
+SGSDK.sg_Utils_ExceptionOccured.argtypes = []
+SGSDK.sg_Utils_ExceptionOccured.restype = c_bool
+SGSDK.sg_Utils_ExceptionOccured.errcheck = None
+
+SGSDK.sg_Utils_ExceptionMessage.argtypes = [c_char_p]
+SGSDK.sg_Utils_ExceptionMessage.restype = None
+SGSDK.sg_Utils_ExceptionMessage.errcheck = None
+
+def sg_errcheck(result, func, args):
+    if SGSDK.sg_Utils_ExceptionOccured():
+        msg = create_string_buffer(_BUFLEN)
+        SGSDK.sg_Utils_ExceptionMessage(msg)
+        raise SwinGameError('{0}({1}): {2}'.format(func.__name__, ', '.join(map(repr, args)), msg.value.decode()))
+    else:
+        return result
 
 def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
     if doc is not None:
         f.__doc__ = doc
     f.restype = ret_type
     f.argtypes = argtypes + [c_char_p] * result_buffers
+    f.errcheck = sg_errcheck
     str_indices = [idx for idx, i in enumerate(argtypes) if i is c_char_p]
     @wraps(f)
     def wrapper(*args):
@@ -35,7 +58,7 @@ def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
             return results[0] if len(results) == 1 else results
         else:
             return f(*args)
-    wrapper.argtypes = f.argtypes
+    wrapper.argtypes = argtypes
     return wrapper
 
 class c_int_enum_META(type):
@@ -46,7 +69,12 @@ class c_int_enum_META(type):
     def __new__(cls, name, bases, ns):
         return type.__new__(cls, name, bases, {k: cls.transform(v) for k, v in ns.items()})
     def __setattr__(self, key, value):
-        type.__setattr__(self, key, type(self).transform(value))
+        super(c_int_enum_META, self).__setattr__(key, type(self).transform(value))
+    
+    def __iter__(self):
+        items = [(k, v) for k, v in self.__dict__.items() if isinstance(v, c_int)]
+        items.sort(lambda i: i[0])
+        return iter(items)
 
 # Py2-Py3 compat hackery
 def from_metaclass(metacls):

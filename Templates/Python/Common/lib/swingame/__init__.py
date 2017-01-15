@@ -1,4 +1,5 @@
-from . import _common, graphics
+from . import _common, graphics, sgsdk
+from ._common import SwinGameError
 from .sgsdk import *
 
 def _guess_app_path():
@@ -21,6 +22,4 @@ Color = type('Color', (_common.c_int_enum,),
                 if k.startswith('color_')
                 and len(v.argtypes) == 0})
 
-__all__ = [g for g in list(globals()) if g != 'graphics'
-                                      and not g.startswith('_')
-                                      and g not in dir(_common)]
+__all__ = dir(sgsdk) + ['Color', 'SwinGameError']

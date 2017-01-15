@@ -9,7 +9,7 @@ Copyright (c) 2009. All rights reserved.
 # stage 1: a simple ctypes binding wrapper for the sgsdk.dll methods
 # stage 2: a compile python module to call sgsdk.dll using cython (~pyrex)
 
-SwinGame/     - the module name
+swingame/     - the module name
   __init__.py - pulls in other modules as needed (for SwinGame)
   core.py     - core application (gameloop) methods
   audio.py    - music sound ...
@@ -24,7 +24,7 @@ from __future__ import print_function
 import logging
 import sys
 import os
-import os.path as path
+import os.path
 
 from sg import parser_runner
 from sg.sg_cache import logger, find_or_add_file
@@ -37,7 +37,7 @@ import py_lib # template definitions
 
 import generated_folders
 
-_out_path = path.join('..', '..', 'Generated', 'Python', 'lib', 'swingame')
+_out_path = os.path.join('..', '..', 'Generated', 'Python', 'lib', 'swingame')
 try:
     os.makedirs(_out_path)
 except OSError:
@@ -59,10 +59,10 @@ _adapter_type_switcher = {
     'void': None,
     'animation': 'Animation',
     'animationscript': 'AnimationScript',
-    'arduinodevice': 'c_void_p',
-    'bitmap': 'c_void_p',
-    'bitmap[0..n - 1]': 'c_void_p',
-    'bitmapptr': 'c_void_p',
+    'arduinodevice': 'ArduinoDevice',
+    'bitmap': 'Bitmap',
+    'bitmap[0..n - 1]': 'POINTER(Bitmap)',
+    'bitmapptr': 'POINTER(Bitmap)',
     'boolean': 'c_bool',
     'boolean[0..n - 1]': 'POINTER(c_bool)',
     'boolean[0..n - 1][0..n - 1]': 'POINTER(c_bool)',
@@ -70,14 +70,14 @@ _adapter_type_switcher = {
     'circle': 'Circle',
     'collisionside': 'c_int',
     'color': 'c_uint32',
-    'connection': 'c_void_p',
+    'connection': 'Connection',
     'drawingdest': 'c_int',
-    'font': 'c_void_p',
+    'font': 'Font',
     'fontalignment': 'c_int',
     'fontstyle': 'c_int',
     'freenotifier': 'CFUNCTYPE(None, c_void_p)',
-    'guieventcallback': 'CFUNCTYPE(None, Region, EventKind)',
-    'httpresponse': 'c_void_p',
+    'guieventcallback': 'CFUNCTYPE(None, Region, c_int)',
+    'httpresponse': 'HttpResponse',
     'keycode': 'c_int',
     'linesarray': 'LinesArray',
     'linesegment': 'LineSegment',
@@ -98,10 +98,10 @@ _adapter_type_switcher = {
     'maptagdetails[0..n - 1][0..23]': 'POINTER(MapTagDetails)',
     'maptile': 'MapTile',
     'matrix2d': 'Matrix2D',
-    'message': 'c_void_p',
+    'message': 'Message',
     'mousebutton': 'c_int',
-    'music': 'c_void_p',
-    'panel': 'c_void_p',
+    'music': 'Music',
+    'panel': 'Panel',
     'point2d': 'Point2D',
     'point2d[0..2]': 'POINTER(Point2D)',
     'point2d[0..3]': 'POINTER(Point2D)',
@@ -111,21 +111,21 @@ _adapter_type_switcher = {
     'pointer': 'c_void_p',
     'psdl_surface': 'c_void_p',
     'rectangle': 'Rectangle',
-    'region': 'c_void_p',
+    'region': 'Region',
     'resourcekind': 'c_int',
-    'serversocket': 'c_void_p',
+    'serversocket': 'ServerSocket',
     'single': 'c_float',
     'single[0..2][0..2]': 'POINTER(c_float)',
     'singleptr': 'POINTER(c_float)',
-    'soundeffect': 'c_void_p',
-    'sprite': 'c_void_p',
+    'soundeffect': 'SoundEffect',
+    'sprite': 'Sprite',
     'spriteendingaction': 'c_int',
     'spriteeventhandler': 'CFUNCTYPE(None, Sprite, SpriteEventKind)',
     'spritefunction': 'CFUNCTYPE(None, Sprite)',
     'spritekind': 'c_int',
     'spritesinglefunction': 'CFUNCTYPE(None, Sprite, c_float)',
     'string': 'c_char_p',
-    'timer': 'c_void_p',
+    'timer': 'Timer',
     'triangle': 'Triangle',
     'uint16': 'c_uint16',
     'vector': 'Vector',
@@ -294,7 +294,7 @@ def write_type_for(member, other):
         else:
             logger.error('CREATE PYTHON  : Unknown class type for %s', member.uname)
             assert False
-        writer.writeln('%s = c_void_p\n' % member.name)
+        writer.writeln('class %s(c_void_p): pass\n' % member.name)
     # PURE STRUCT
     elif member.is_struct:
         #class Point2D(Structure): # record/struct;
@@ -325,7 +325,7 @@ def write_type_for(member, other):
 
 def write_py_module(the_file):
     '''Write the header and c file to wrap the attached files details'''
-    with FileWriter(path.join(_out_path, the_file.name.lower() + '.py')) as mod:
+    with FileWriter(os.path.join(_out_path, the_file.name.lower() + '.py')) as mod:
         mod.writeln(py_lib.header % { 
             'name' : the_file.name,
             'pascal_name' : the_file.pascal_name,
