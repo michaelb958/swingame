@@ -66,12 +66,12 @@ def %(uname_lower)s():
 """,
 'widest_points': """
 SGSDK.%(calls.name)s.restype = c_bool
-def %(uname_lower)s(c, from):
+def %(uname_lower)s(c, from_):
     '''%(doc)s
     params: %(params)s
     '''
     pt1, pt2 = Point2D(), Point2D()
-    if SGSDK.%(calls.name)s(c, from, byref(pt1), byref(pt2)):
+    if SGSDK.%(calls.name)s(c, from_, byref(pt1), byref(pt2)):
         return pt1, pt2
     else:
         return None, None

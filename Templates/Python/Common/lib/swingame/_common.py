@@ -18,20 +18,23 @@ except AttributeError:
     # not on Windows
     pass
 
-SGSDK = find_library('SGSDK')
-if SGSDK is None:
-    raise ImportError("can't find SGSDK library")
+try:
+    SGSDK = cdll.SGSDK
+except AttributeError:
+    SGSDK = find_library('SGSDK')
+    if SGSDK is None:
+        raise ImportError("can't find SGSDK library")
 
 class SwinGameError(Exception):
     pass
 
 SGSDK.sg_Utils_ExceptionOccured.argtypes = []
 SGSDK.sg_Utils_ExceptionOccured.restype = c_bool
-SGSDK.sg_Utils_ExceptionOccured.errcheck = None
+del SGSDK.sg_Utils_ExceptionOccured.errcheck
 
 SGSDK.sg_Utils_ExceptionMessage.argtypes = [c_char_p]
 SGSDK.sg_Utils_ExceptionMessage.restype = None
-SGSDK.sg_Utils_ExceptionMessage.errcheck = None
+del SGSDK.sg_Utils_ExceptionMessage.errcheck
 
 def sg_errcheck(result, func, args):
     if SGSDK.sg_Utils_ExceptionOccured():

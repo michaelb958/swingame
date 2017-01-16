@@ -1,4 +1,4 @@
-﻿import swingame as sg
+import swingame as sg
 
 def main():
     sg.open_graphics_window('Hello World', 800, 600)
