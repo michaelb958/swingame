@@ -76,7 +76,7 @@ class c_int_enum_META(type):
     
     def __iter__(self):
         items = [(k, v) for k, v in self.__dict__.items() if isinstance(v, c_int)]
-        items.sort(lambda i: i[0])
+        items.sort(key=lambda i: i[0])
         return iter(items)
 
 # Py2-Py3 compat hackery
