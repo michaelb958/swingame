@@ -83,9 +83,13 @@ class c_int_enum_META(type):
 def from_metaclass(metacls):
     return metacls('from_metaclass(%s)' % metacls.__name__, (object,), {})
 
-class c_int_enum(from_metaclass(c_int_enum_META)):
-    def __new__(cls, *args):
-        raise RuntimeError("can't instantiate an enum")
+class c_int_enum(from_metaclass(c_int_enum_META), c_int):
+    def __new__(cls, value):
+        for v in cls.__dict__.values():
+            if v.value == value:
+                return v
+        else:
+            raise ValueError('value not present in enum')
     
     # needed for ctypes to play nice
     @classmethod
