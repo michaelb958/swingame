@@ -1,5 +1,5 @@
 from __future__ import print_function
-from ctypes import cdll, c_int, c_bool, c_char_p, create_string_buffer
+from ctypes import cdll, c_int, c_bool, c_char_p, create_string_buffer, Structure, byref
 from ctypes.util import find_library
 from functools import wraps
 
@@ -64,13 +64,24 @@ def extern(f, argtypes, doc=None, ret_type=c_int, result_buffers=0):
     wrapper.argtypes = argtypes
     return wrapper
 
-class c_int_enum_META(type):
+class ByRefStructure(Structure):
+    @classmethod
+    def from_param(cls, self):
+        try:
+            return byref(self._as_parameter_)
+        except AttributeError:
+            return byref(self)
+
+class c_int_enum_META(type(c_int), type):
+    _type_ = c_int._type_ # needed for ctypes to play nice
+    
     @staticmethod
     def transform(n):
         return c_int(n) if isinstance(n, int) else n
     
     def __new__(cls, name, bases, ns):
-        return type.__new__(cls, name, bases, {k: cls.transform(v) for k, v in ns.items()})
+        return super(c_int_enum_META, cls).__new__(cls, name, bases,
+                                                   {k: cls.transform(v) for k, v in ns.items()})
     def __setattr__(self, key, value):
         super(c_int_enum_META, self).__setattr__(key, type(self).transform(value))
     
@@ -93,5 +104,5 @@ class c_int_enum(from_metaclass(c_int_enum_META), c_int):
     
     # needed for ctypes to play nice
     @classmethod
-    def from_param(self):
+    def from_param(cls, self):
         pass

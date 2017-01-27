@@ -299,7 +299,7 @@ def write_type_for(member, other):
     elif member.is_struct:
         #class Point2D(Structure): # record/struct;
         #    _fields_ = [('x', c_float), (), ... ]
-        writer.writeln('class %s(Structure):' % member.name)
+        writer.writeln('class %s(ByRefStructure):' % member.name)
         writer.writeln("    '''%s\n    '''" % '\n   '.join(member.doc.splitlines()))
         writer.writeln('    _fields_ = [')
         for field in member.field_list:
@@ -340,7 +340,7 @@ def write_py_module(the_file):
             mod.writeln(py_lib.header2)
         
         if the_file.name == 'Types':
-            mod.writeln("from ._common import c_int_enum")
+            mod.writeln("from ._common import c_int_enum, ByRefStructure")
         
         #process all methods
         other = {
